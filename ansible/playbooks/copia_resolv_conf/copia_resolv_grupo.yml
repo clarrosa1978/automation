@@ -1,0 +1,13 @@
+---
+- hosts: suc02
+  tasks:
+    - name: Copia resolv.conf
+      copy:
+       src: /tecnol/ansible/olam/suc-etc/resolv.conf
+       dest: /tmp/prueba/resolv.conf
+       owner: root
+       group: root
+       mode: '0644'
+       backup: yes
+       force: yes
+...

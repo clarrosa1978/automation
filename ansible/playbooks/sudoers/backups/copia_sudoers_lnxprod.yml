@@ -1,0 +1,13 @@
+---
+- hosts: all
+  tasks:
+    - name: Copia sudoers a Produccion Linux
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/sudoers
+       dest: /tmp/sudoers
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+...

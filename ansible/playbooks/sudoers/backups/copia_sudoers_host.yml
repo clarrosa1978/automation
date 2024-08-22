@@ -1,0 +1,13 @@
+---
+- hosts: all
+  tasks:
+    - name: Copia sudoers a Hosts
+      copy:
+       src: /tecnol/ansible/olam/inventarios/host-etc/sudoers
+       dest: /etc/sudoers
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+...

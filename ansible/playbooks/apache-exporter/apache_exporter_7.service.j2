@@ -1,0 +1,13 @@
+[Unit]
+Description=Apache Exporter Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/apache_exporter --scrape_uri=http://localhost:7777/server-status/?auto &
+Restart=on-failure
+User=nobody
+Group=nobody
+
+[Install]
+WantedBy=multi-user.target

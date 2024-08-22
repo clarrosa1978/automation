@@ -1,0 +1,15 @@
+# Command Alias specification
+Cmnd_Alias   RMSUDOLOG = /usr/bin/rm /tmp/sudolog
+
+# Defaults specification
+Defaults        !env_reset
+Defaults        !env_delete
+Defaults        env_keep="LD_LIBRARY_PATH PATH"
+Defaults        secure_path="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6:/bin"
+Defaults        logfile=/tmp/sudolog
+Defaults        log_host
+
+## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
+#includedir /etc/sudoers.d
+
+# User specification

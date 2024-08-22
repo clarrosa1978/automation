@@ -1,0 +1,14 @@
+---
+- name: Copia regla de Sudo segun el grupo del Inventario
+  hosts: all
+  tasks:
+    - name: Copia regla {{ regla }} para el grupo seleccionado
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+...

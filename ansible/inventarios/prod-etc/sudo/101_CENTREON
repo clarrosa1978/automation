@@ -1,0 +1,22 @@
+mysql   ALL=(ALL)       ALL
+User_Alias      CENTREON=apache,nagios
+
+Defaults:CENTREON !requiretty
+CENTREON   ALL = NOPASSWD: /etc/init.d/nagios* restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/nagios restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/nagios* reload
+CENTREON   ALL = NOPASSWD: /etc/init.d/nagios reload
+CENTREON   ALL = NOPASSWD: /usr/bin/nagios* -v *
+CENTREON   ALL = NOPASSWD: /usr/bin/nagios -v *
+CENTREON   ALL = NOPASSWD: /usr/bin/nagios* -s *
+CENTREON   ALL = NOPASSWD: /usr/bin/nagios -s *
+CENTREON   ALL = NOPASSWD: /etc/init.d/snmptrapd restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/snmptt restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/centstorage restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/centstorage stop
+CENTREON   ALL = NOPASSWD: /etc/init.d/centstorage start
+CENTREON   ALL = NOPASSWD: /etc/init.d/ndo2db* restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/ndo2db restart
+CENTREON   ALL = NOPASSWD: /etc/init.d/ndo2db* reload
+CENTREON   ALL = NOPASSWD: /etc/init.d/ndo2db reload
+CENTREON   ALL = NOPASSWD: /bin/mail

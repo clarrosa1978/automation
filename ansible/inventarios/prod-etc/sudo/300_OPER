@@ -1,0 +1,16 @@
+User_Alias   OPER = ope1, ope2, ope3, ope4, ope5, ope6, ope7
+
+Defaults:OPER   timestamp_timeout=-1
+
+OPER    ALL = (vprctrl) NOPASSWD: ALL
+OPER    ALL = (ctmsrv) NOPASSWD: ALL
+OPER    ALL = (sfctrl) NOPASSWD: ALL
+OPER    ALL = (ctmsrv7) NOPASSWD: ALL
+OPER    ALL = (oracle) NOPASSWD: ALL
+OPER    ALL = (java) NOPASSWD: ALL
+OPER    ALL = (jboss) NOPASSWD: ALL
+OPER    ALL = (jboss422) NOPASSWD: ALL
+OPER    ALL = (sit) NOPASSWD: ALL
+OPER    ALL = (cdv) NOPASSWD: ALL
+OPER    ALL = (merlin) NOPASSWD: ALL
+OPER    ALL = (root) NOPASSWD: /home/ctmagt/ctm/scripts/shut-ag, /home/ctmagt/ctm/scripts/start-ag, /sbin/reboot, /sbin/poweroff, /sbin/service, /tecnol/backup/menudvd.sh, /usr/bin/cancel, /usr/bin/disable, /usr/bin/enable, /usr/bin/matar, /bin/vi /etc/hosts, /usr/sbin/setup, /bin/kill, /bin/cp, /bin/mv, /bin/cat, /bin/kill, /tecnol/operador/menu.operador.suc, /usr/sbin/cupsenable, /usr/sbin/cupsdisable, /usr/sbin/ntpdate

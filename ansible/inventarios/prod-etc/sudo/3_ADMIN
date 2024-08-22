@@ -1,0 +1,6 @@
+User_Alias  ADMIN = clarrosa, galonso, 176650, 191455, 195229
+
+Defaults:ADMIN   timestamp_timeout=-1
+
+ADMIN   ALL = (ALL)  NOPASSWD:  ALL
+ADMIN   ALL = (ALL)  !RMSUDOLOG

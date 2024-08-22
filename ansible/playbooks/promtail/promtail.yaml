@@ -1,0 +1,72 @@
+---
+- name:  Install Promtail
+  hosts: all
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+
+  tasks:
+
+    - name: Download Promtail binary
+      copy:
+        src: "./promtail-2.9.6.x86_64.rpm"
+        dest: /tmp/promtail-2.9.6.x86_64.rpm
+    
+    - name: Install promtail binary
+      shell: yum install /tmp/promtail-2.9.6.x86_64.rpm -y
+
+    - name: Create configuration directory
+      file:
+        path: /etc/promtail
+        state: directory
+
+    - name: Copy Promtail configuration file
+      copy:
+        src: "promtail_config.j2"
+        dest: /etc/promtail/config.yml
+
+    - name: Create SysVinit service file for CentOS 6
+      template:
+        src: "promtail_service_6.j2"
+        dest: /etc/init.d/promtail.service
+        mode: 0755
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Ensure service starts on boot
+      command: chkconfig promtail.service on
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Cambio permisos al servicio
+      command: chmod 755 /etc/init.d/promtail.service
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Add service to chkconfig on CentOS 6
+      command: chkconfig --add promtail.service
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Ensure service starts on boot
+      command: chkconfig promtail.service on
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Start service
+      command: service promtail.service start
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Create SysVinit service file for CentOS 7
+      template:
+        src: "promtail_service_7.j2"
+        dest: /etc/systemd/system/promtail.service
+        mode: 0755
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+
+    - name: Enable and start Promtail service
+      systemd:
+        name: promtail
+        enabled: yes
+        state: started
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7' or  ansible_distribution_major_version == '8'

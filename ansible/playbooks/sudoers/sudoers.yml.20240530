@@ -1,0 +1,70 @@
+---
+- name: Copiar reglas de sudo segun grupo
+  hosts: "{{ selected_group }}"
+  
+  vars:
+    grupos:
+      defaults: 
+        - '3_ADMIN'
+        - '300_OPER'
+        - '901_ANSIBLE'
+        - 'DEFAULTS'
+      gapp:
+        - '3_ADMIN'
+        - '300_OPER'
+      gapache:
+        - '48_APACHE'
+      gcentreon:
+        - '101_CENTREON'
+      gdb:
+        - '501_ORACLE'
+      gpsoft:
+        - '1274_PSOFT'
+      gdocker:
+        - '297_DOCKER'
+      gsf:
+        - '501_ORACLE'
+        - '90_SF'
+
+
+  pre_tasks:
+
+    - name: Copiando reglas default
+      copy:
+        src: "/tecnol/ansible/olam/inventarios/prod-etc/sudo/{{ item }}"
+        dest: "/etc/sudoers.d/{{ item }}"
+        owner: root
+        group: root
+        mode: '0440'
+        backup: yes
+        force: yes
+      loop: "{{ grupos['defaults'] }}"
+      
+    
+
+    - name: Copiar template basico sudoers
+      copy:
+        src: "/tecnol/ansible/olam/inventarios/prod-etc/sudo/sudoers"
+        dest: "/etc/sudoers"
+        owner: root
+        group: root
+        mode: '0440'
+        backup: yes
+        force: yes
+    
+
+  tasks:
+
+    - name: Copiando reglas sudo por grupo seleccionado
+      copy:
+        src: "/tecnol/ansible/olam/inventarios/prod-etc/sudo/{{ item }}"
+        dest: "/etc/sudoers.d/{{ item }}"
+        owner: root
+        group: root
+        mode: '0440'
+        backup: yes
+        force: yes
+      loop: "{{ grupos[selected_group] }}"
+    
+
+

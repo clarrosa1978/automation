@@ -1,0 +1,123 @@
+---
+- name: Instalar process_exporter
+  hosts: all
+  become: true
+  
+  vars:
+    process_exporter_install_dir: "/opt/process_exporter"
+    ansible_python_interpreter: /usr/bin/python3.9
+  tasks:
+
+    - name: Chequeo estado de iptables
+      shell: ls -ltr /etc/sysconfig/iptables
+      register: iptables_status
+      ignore_errors: true
+      
+    - name: Backup rules
+      shell: iptables-save > /etc/sysconfig/iptables.{{ ansible_date_time.date }}
+      args:
+        warn: no
+      register: iptables_backup
+      changed_when: iptables_backup.stdout != ""
+      when: iptables_status.rc == 0
+
+    - name: Obtener IP server
+      set_fact:
+        server_ip: "{{ ansible_default_ipv4.address }}"
+      when: iptables_status.rc == 0
+     
+
+    - name: Agrego reglas de entrada desde server prometheus [9256]
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        source: "{{ item }}"
+        destination: "{{ server_ip }}"
+        destination_port: 9256  
+        ctstate: NEW,ESTABLISHED,RELATED
+        jump: ACCEPT
+        action: insert
+        rule_num: 10   
+      become: true
+      with_items:
+        - 172.16.8.64
+      when: iptables_status.rc == 0
+
+    - name: Agrego reglas de entrada hacia server prometheus [9256]
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        source: "{{ server_ip }}" 
+        destination: "{{ item }}"
+        destination_port: 9256  
+        ctstate: NEW,ESTABLISHED,RELATED
+        jump: ACCEPT
+        action: insert
+        rule_num: 11   
+      become: true
+      with_items:
+        - 172.16.8.64
+      when: iptables_status.rc == 0
+
+    - name: Guardo reglas
+      command: service iptables save
+      become: true
+      when: iptables_status.rc == 0
+
+    - name: Creo directorio para process_exporter
+      file:
+        path: "{{ process_exporter_install_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Creo directorio temporal para process_exporter
+      file:
+        path: "/tmp/process-exporter_install/a"
+        state: directory
+        mode: "0755"
+        
+    - name: Copio binario a directorio temporal [OL6]
+      copy:
+        src: "process-exporter-0.8.2.linux-amd64.tar.gz"
+        dest: "/tmp/process-exporter_install/process-exporter-0.8.2.linux-amd64.tar.gz"
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Extraigo [OL6]
+      unarchive:
+        src: "/tmp/process-exporter_install/process-exporter-0.8.2.linux-amd64.tar.gz"
+        dest: "{{ process_exporter_install_dir }}"
+        remote_src: yes
+        extra_opts: --strip-components=1
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Genero el servicio [rhel6]
+      template:
+        src: "process-exporter_6.service.j2"
+        dest: "/etc/init.d/process_exporter.service"
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Add service to chkconfig on CentOS 6
+      command: chkconfig --add process_exporter.service
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Ensure service starts on boot
+      command: chkconfig process_exporter.service on
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Cambio permisos al servicio
+      command: chmod 755 /etc/init.d/process_exporter.service
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Copio binario a directorio temporal
+      copy:
+        src: "process-exporter_0.8.2_linux_amd64.rpm"
+        dest: "/tmp/process-exporter_install/process-exporter_0.8.2_linux_amd64.rpm"
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7' or ansible_distribution_major_version == '8' or ansible_distribution_major_version == '9'
+
+    - name: Instalo el RPM
+      yum:
+        name: /tmp/process-exporter_install/process-exporter_0.8.2_linux_amd64.rpm
+        state: present
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7' or ansible_distribution_major_version == '8' or ansible_distribution_major_version == '9'
+
+  

@@ -1,0 +1,104 @@
+---
+- name: Copia sudoers segun el grupo del Inventario
+  hosts: all
+  tasks:
+    - name: Copia archivo en el grupo gcomun
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gcomun/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gcomun']
+
+    - name: Copia archivo en el grupo gbitbucket
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gbitbucket/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gbitbucket']
+
+    - name: Copia archivo en el grupo gapache
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gapache/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gapache']
+
+    - name: Copia archivo en el grupo gcentreon
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gcentreon/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gcentreon']
+
+    - name: Copia archivo en el grupo gapp
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gapp/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gapp']
+
+    - name: Copia archivo en el grupo gdb
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gdb/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gdb']
+
+    - name: Copia archivo en el grupo gpsoft
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gpsoft/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gpsoft']
+
+    - name: Copia archivo en el grupo gdocker
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gdocker/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gdocker']
+
+    - name: Copia archivo en el grupo gsf
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/gsf/sudoers
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gsf']
+
+...

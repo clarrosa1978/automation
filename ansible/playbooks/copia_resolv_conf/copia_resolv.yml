@@ -1,0 +1,13 @@
+---
+- hosts: all
+  tasks:
+    - name: Copia resolv.conf
+      copy:
+       src: /tecnol/ansible/olam/comun/resolv.conf
+       dest: /etc/resolv.conf
+       owner: root
+       group: root
+       mode: '0644'
+       backup: yes
+       force: yes
+...

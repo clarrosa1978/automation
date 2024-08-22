@@ -1,0 +1,179 @@
+---
+- name: Install Python from source based on Red Hat version
+  hosts: all
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python
+
+
+  pre_tasks:
+
+    - name: Create directory for Python installation
+      file:
+        path: /tmp/python_install
+        state: directory
+        mode: "0755"
+
+    - name: Check if libffi-devel is available in the repository
+      command: yum list available libffi-devel.x86_64
+      register: libffi_devel_available
+      ignore_errors: true
+
+    - name: Check if zlib is available in the repository
+      command: yum list available zlib-devel
+      register: zlib_devel_available
+      ignore_errors: true
+
+    - name: Check libffi version
+      command: rpm -q libffi
+      register: libffi_check
+      ignore_errors: true
+      when: libffi_devel_available.rc != 0
+
+    - name: Determine libffi version
+      set_fact:
+        libffi_version: "{{ libffi_check.stdout.split('-')[1] }}"
+        libffi_release: "{{ libffi_check.stdout.split('-')[2] }}"
+      when: libffi_devel_available.rc != 0
+
+    - name: Determine libffi-devel package filename based on installed libffi version
+      set_fact:
+        libffi_devel_rpm: "libffi-devel-{{ libffi_version }}-{{ libffi_release }}.rpm"
+      when: libffi_devel_available.rc != 0
+
+    - name: Check if libffi-devel is installed
+      command: rpm -q libffi-devel
+      register: libffi_devel_check
+      ignore_errors: true
+    
+    - name: Check if Python 3.9 is already installed
+      command: python3.9 --version
+      register: python3_check
+      ignore_errors: true
+
+    - name: Check if zlib-devel is installed
+      shell: |
+        for dir in /usr/lib /usr/local/lib /lib /usr/lib64; do
+          if [ -e $dir/libz.so ]; then
+            echo "Zlib found in $dir"
+            exit 0
+          fi
+        done
+        echo "Zlib not found"
+        exit 1
+      register: zlib_installed
+      ignore_errors: true
+
+  tasks:
+    - name: Install libffi-devel from repository if available
+      yum:
+        name: libffi-devel.x86_64
+        state: present
+      when: libffi_devel_available.rc == 0
+
+    - name: Install gglibc-devel.x86_64
+      yum:
+        name: glibc-devel.x86_64
+        state: present
+
+    - name: Install zlib-devel from repository if available
+      yum:
+        name: zlib-devel
+        state: present
+      when: zlib_devel_available.rc == 0
+      register: zlib_installed_from_repo
+
+    - name: Copy libffi-devel package
+      copy:
+        src: "../files/libffi/{{libffi_devel_rpm}}"
+        dest: "/tmp/python_install/{{libffi_devel_rpm}}"
+      when: libffi_devel_check.rc != 0 and libffi_devel_available.rc != 0
+
+    - name: Install libffi-devel 
+      shell: rpm -ivh /tmp/python_install/{{libffi_devel_rpm}}
+      when: libffi_devel_check.rc != 0 and libffi_devel_available.rc != 0  
+
+    - name: Copy zlib source if not installed
+      copy:
+        src: "../files/zlib-1.3.1.tar.gz"
+        dest: "/tmp/python_install/zlib-1.3.1.tar.gz"
+      when: zlib_installed.rc != 0 and zlib_devel_available.rc != 0
+
+    - name: Extract zlib source
+      shell: tar -xvf "/tmp/python_install/zlib-1.3.1.tar.gz" -C /tmp/python_install/
+      when: zlib_installed.rc != 0 and zlib_devel_available.rc != 0
+    
+    - name: Copy Python
+      copy:
+        src: "../files/Python-3.9.9.tgz"
+        dest: "/tmp/python_install/Python-3.9.9.tgz"
+      when: python3_check.rc != 0
+
+    - name: Extract Python source
+      shell: tar -xvf "/tmp/python_install/Python-3.9.9.tgz" -C /tmp/python_install/
+      when: python3_check.rc != 0
+      
+    - name: Configure zlib
+      shell: |
+        cd /tmp/python_install/{{ item | regex_replace('.tar.gz$', '') }}
+        ./configure --prefix=/usr/
+      loop:
+        - zlib-1.3.1.tar.gz
+      when: zlib_installed.rc != 0 and zlib_devel_available.rc != 0
+
+    - name: Make zlib
+      shell: |
+        cd /tmp/python_install/{{ item | regex_replace('.tar.gz$', '') }}
+        make
+      loop:
+        - zlib-1.3.1.tar.gz
+      when: zlib_installed.rc != 0 and zlib_devel_available.rc != 0
+
+    - name: Make install zlib
+      shell: |
+        cd /tmp/python_install/{{ item | regex_replace('.tar.gz$', '') }}
+        make install
+      loop:
+        - zlib-1.3.1.tar.gz
+      when: zlib_installed.rc != 0 and zlib_devel_available.rc != 0
+      register: zlib_installed_from_source
+
+    - name: Configure Python
+      shell: |
+        cd /tmp/python_install/{{ item | regex_replace('.tgz$', '') }}
+        ./configure --prefix=/usr/
+      loop:
+        - Python-3.9.9.tgz
+      when: not python3_check and zlib_installed_from_repo or zlib_installed_from_source or zlib_installed
+
+
+    - name: Make Python
+      shell: |
+        cd /tmp/python_install/{{ item | regex_replace('.tgz$', '') }}
+        make
+      loop:
+        - Python-3.9.9.tgz
+      when: not python3_check and zlib_installed_from_repo or zlib_installed_from_source or zlib_installed
+
+
+    - name: Make altinstall Python
+      shell: |
+        cd /tmp/python_install/{{ item | regex_replace('.tgz$', '') }}
+        make altinstall
+      loop:
+        - Python-3.9.9.tgz
+      when: not python3_check and zlib_installed_from_repo or zlib_installed_from_source or zlib_installed
+
+    - name: Copy psutil module
+      copy:
+        src: "../files/psutil-5.9.8-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+        dest: "/tmp/python_install/psutil-5.9.8-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+
+    - name: Install psutil offline
+      shell: |
+         python3.9 -m pip install /tmp/python_install/psutil-5.9.8-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+
+    - name: Cleanup copied files
+      file:
+        path: "/tmp/python_install/"
+        state: absent

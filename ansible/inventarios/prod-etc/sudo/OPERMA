@@ -1,0 +1,3 @@
+User_Alias   OPERMA = opma1, opma2, opma3 ,opma4, opma5, opma6, opma7, opma8, opma9, opma10, opma11, opma12, opma13, opma14, opma15, opma16
+OPERMA  ALL = (ctmsrv7) NOPASSWD: /home/ctmsrv7/ctm_server/exe_RedHat/ctmcontb, /bin/csh
+OPERMA  ALL = (sfctrl) NOPASSWD: /tecnol/mayuda/

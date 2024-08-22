@@ -1,0 +1,126 @@
+---
+- name: Copia regla de Sudo segun el grupo del Inventario
+  hosts: all
+  vars:
+    grupo_app:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+    grupo_apache:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+      - { regla: '48_APACHE' }
+    grupo_centreon:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+      - { regla: '101_CENTREON' }
+    grupo_db:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+      - { regla: '501_ORACLE' }
+    grupo_psoft:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+      - { regla: '1274_PSOFT' }
+    grupo_docker:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+      - { regla: '297_DOCKER' }
+    grupo_sf:
+      - { regla: '3_ADMIN' }
+      - { regla: '300_OPER' }
+      - { regla: '901_ANSIBLE' }
+      - { regla: '501_ORACLE' }
+      - { regla: '90_SF' }
+
+  tasks:
+    - name: Copia regla para el grupo APP
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_app}}"
+      when: "'all' in group_names"
+
+  tasks:
+    - name: Copia regla para el grupo APACHE
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_apache}}"
+      when: "'gapache' in group_names"
+
+    - name: Copia regla para el grupo CENTREON
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_centreon}}"
+      when: "'gcentreon' in group_names"
+
+    - name: Copia regla para el grupo DB
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_db}}"
+      when: "'gdb' in group_names"
+
+    - name: Copia regla para el grupo PSOFT
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_psoft}}"
+      when: "'gpsoft' in group_names"
+
+    - name: Copia regla para el grupo DOCKER
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_docker}}"
+      when: "'gdocker' in group_names"
+
+    - name: Copia regla para el grupo SF
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/{{ item.regla }}
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      with_items: "{{grupo_sf}}"
+      when: "'gsf' in group_names"
+...

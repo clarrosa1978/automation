@@ -1,0 +1,61 @@
+---
+- name: Instalar apache_exporter
+  hosts: all
+  become: true
+  vars:
+    apache_exporter_install_dir: "/usr/bin/"
+  tasks:
+
+    - name: Copio Node exporter
+      copy:
+        src: "/tecnol/ansible/olam/playbooks/apache-exporter/apache_exporter-1.0.8.linux-amd64.tar.gz"
+        dest: "/tmp/apache_exporter/"
+        mode: '0644'
+
+    - name: Extraigo 
+      unarchive:
+        src: "/tmp/apache_exporter/apache_exporter-1.0.8.linux-amd64.tar.gz"
+        dest: "{{ apache_exporter_install_dir }}"
+        remote_src: yes
+        extra_opts: --strip-components=1
+
+    - name: Genero el servicio [rhel6]
+      template:
+        src: "apache_exporter_6.service.j2"
+        dest: "/etc/init.d/apache_exporter.service"
+      when: ansible_distribution_major_version == '6'
+
+    - name: Add service to chkconfig on CentOS 6
+      command: chkconfig --add apache_exporter.service
+      when: ansible_distribution_major_version == '6'
+
+    - name: Ensure service starts on boot
+      command: chkconfig apache_exporter.service on
+      when: ansible_distribution_major_version == '6'
+
+    - name: Cambio permisos al servicio
+      command: chmod 755 /etc/init.d/apache_exporter.service
+      when:  ansible_distribution_major_version == '6'
+
+    - name: Inicio servicio
+      command: service apache_exporter.service start
+      when:  ansible_distribution_major_version == '6'
+
+    - name: Genero el servicio [rhel7]
+      template:
+        src: "apache_exporter_7.service.j2"
+        dest: "/etc/systemd/system/apache_exporter.service"
+      when: ansible_distribution_major_version == '7' or ansible_distribution_major_version == '8' or ansible_distribution_major_version == '9'
+    
+    - name: Add service to systemd on RHEL 7
+      systemd:
+        name: apache_exporter_7.service
+        enabled: yes
+      when: ansible_distribution_major_version == '7' or ansible_distribution_major_version == '8' or ansible_distribution_major_version == '9'
+      
+    - name: Inicio el servicio
+      service:
+        name: apache_exporter_7.service
+        state: started
+        enabled: yes
+      when: ansible_distribution_major_version == '7' or ansible_distribution_major_version == '8' or ansible_distribution_major_version == '9'

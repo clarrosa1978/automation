@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# /etc/rc.d/init.d/promtail
+#
+# chkconfig: 35 95 20
+#  promtail
+#
+#  description: promtail
+#  processname: promtail
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+PROGNAME=promtail
+PROG=/usr/bin/$PROGNAME
+USER=root
+LOGFILE=/var/log/promtail.log
+LOCKFILE=/var/run/$PROGNAME.pid
+
+start() {
+    echo -n "Starting $PROGNAME: "
+    cd /etc/promtail
+    daemon --user $USER --pidfile="$LOCKFILE" "$PROG -config.file config.yml  &>$LOGFILE &"
+    echo $(pidofproc $PROGNAME) >$LOCKFILE
+    echo
+}
+
+stop() {
+    echo -n "Shutting down $PROGNAME: "
+    killproc $PROGNAME
+    rm -f $LOCKFILE
+    echo
+}
+
+
+case "$1" in
+    start)
+    start
+    ;;
+    stop)
+    stop
+    ;;
+    status)
+    status $PROGNAME
+    ;;
+    restart)
+    stop
+    start
+    ;;
+    reload)
+    echo "Sending SIGHUP to $PROGNAME"
+    kill -SIGHUP $(pidofproc $PROGNAME)#!/bin/bash
+    ;;
+    *)
+        echo "Usage: service process_exporter {start|stop|status|reload|restart}"
+        exit 1
+    ;;
+esac

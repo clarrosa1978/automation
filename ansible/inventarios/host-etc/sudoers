@@ -1,0 +1,37 @@
+# User alias specification
+User_Alias   ADMIN = delnegro, clarrosa, galonso, 159256, 176650, ansible, 191455
+User_Alias   OPER = ope1, ope2, ope3, ope4, ope5, ope6, ope7
+User_Alias   OPERMA = opma1, opma2, opma3 ,opma4, opma5, opma6, opma7, opma8, opma9, opma10, opma11, opma12, opma13, opma14, opma15, opma16
+
+# Command Alias specification
+Cmnd_Alias   RMSUDOLOG = /usr/bin/rm /tmp/sudolog
+
+
+# Defaults specification
+Defaults        !env_reset
+Defaults        !env_delete
+Defaults        env_keep="LD_LIBRARY_PATH PATH"
+Defaults        secure_path="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6:/bin"
+Defaults   logfile=/tmp/sudolog
+Defaults   log_host
+Defaults:ADMIN   timestamp_timeout=-1
+Defaults:OPER   timestamp_timeout=-1
+
+# User specification
+ADMIN   ALL = (ALL)  NOPASSWD:  ALL
+ADMIN   ALL = (ALL)  !RMSUDOLOG
+OPER    ALL = (vprctrl) NOPASSWD: ALL
+OPER    ALL = (sfctrl) NOPASSWD: ALL
+OPER    ALL = (ctmsrv7) NOPASSWD: ALL
+OPER    ALL = (ctmsrv) NOPASSWD: ALL
+OPER    ALL = (oracle) NOPASSWD: ALL
+OPER    ALL = (root) NOPASSWD: /home/ctmagt/ctm/scripts/shut-ag, /home/ctmagt/ctm/scripts/start-ag, /sbin/reboot, /sbin/poweroff, /sbin/service, /usr/bin/matar, /bin/vi /etc/hosts, /bin/kill, /bin/cp, /bin/mv, /bin/cat, /bin/kill, /tecnol/operador/menu.operador.suc, /usr/sbin/ntpdate
+OPERMA  ALL = (ctmsrv7) NOPASSWD: /home/ctmsrv7/ctm_server/exe_RedHat/ctmcontb, /bin/csh
+OPERMA  ALL = (sfctrl) NOPASSWD: /tecnol/mayuda/
+Defaults:nrpe !requiretty
+nrpe ALL = (ALL) NOPASSWD: ALL
+nagios  ALL = (ALL) NOPASSWD: ALL
+transfer ALL = (ALL) NOPASSWD: ALL
+Defaults:transfer !requiretty
+sysadm	ALL = (ALL) NOPASSWD: ALL
+Defaults:sysadm !requiretty

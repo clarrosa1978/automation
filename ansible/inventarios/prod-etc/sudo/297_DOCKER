@@ -1,0 +1,3 @@
+User_Alias DOCKER = 175530, mdaruich
+
+DOCKER ALL = (root) NOPASSWD: /usr/bin/docker ps *, /usr/bin/docker stats, /usr/bin/docker exec *, /usr/bin/docker network ls, /usr/bin/docker logs *

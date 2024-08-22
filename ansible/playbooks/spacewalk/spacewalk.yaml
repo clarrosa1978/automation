@@ -1,0 +1,57 @@
+---
+- name: Spacewalk fix
+  hosts: all
+  tasks:
+    - name: Verificar conexión al puerto 80 del servidor Spacewalk
+      shell: |
+        nc -zv -w 10 slnxolm01 80
+      register: port_80_result
+      ignore_errors: yes
+
+    - name: Leo archivo iptables
+      shell: cat /etc/sysconfig/iptables
+      register: iptables_content
+      when: port_80_result.rc != 0
+    
+    - name: Defino nueva regla
+      set_fact:
+        new_rule: "-A INPUT -s 128.2.101.108/32 -d {{ ansible_hostname }} -p tcp -m tcp -m state --state NEW,ESTABLISHED -j ACCEPT"
+      when: port_80_result.rc != 0
+    
+    - name: Agrego linea antes de linea "-A INPUT -j AUDITA-TRAFICO"
+      lineinfile:
+        path: /etc/sysconfig/iptables
+        line: "{{ new_rule }}"
+        insertbefore: "^-A INPUT -j AUDITA-TRAFICO"
+      when: port_80_result.rc != 0
+      register: rule_added
+
+    - name: Recargo servicio iptables
+      shell: service iptables reload
+      when: rule_added.changed
+
+    - name: Eliminar el paquete rhn-org-trusted-ssl-cert-1.0-2.noarch.rpm si existe
+      shell: rpm -e rhn-org-trusted-ssl-cert-1.0-2.noarch
+      ignore_errors: yes
+
+    - name: Descargar el paquete desde la URL
+      shell: wget -O /tmp/rhn-org-trusted-ssl-cert-1.0-2.noarch.rpm http://slnxolm01/pub/spacewalk6/rhn-org-trusted-ssl-cert-1.0-2.noarch.rpm
+
+    - name: Instalar el paquete descargado
+      shell: rpm -i /tmp/rhn-org-trusted-ssl-cert-1.0-2.noarch.rpm
+   
+    - name: Registrar el servidor si es Red Hat 6
+      shell: >
+        rhnreg_ks --force --activationkey="1-2-centos-6.8-x86_64-base" 
+        --serverUrl=http://slnxolm01/XMLRPC 
+        --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT 
+        --profilename={{ ansible_hostname }}
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '6'
+
+    - name: Registrar el servidor si es Red Hat 7
+      shell: >
+        rhnreg_ks --force --activationkey="1-2-centos7-x86_64-Base" 
+        --serverUrl=http://slnxolm01/XMLRPC 
+        --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT 
+        --profilename={{ ansible_hostname }}
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'

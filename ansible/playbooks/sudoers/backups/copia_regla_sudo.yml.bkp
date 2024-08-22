@@ -1,0 +1,70 @@
+---
+- name: Copia regla de Sudo segun el grupo del Inventario
+  hosts: all
+  tasks:
+    - name: Copia regla para el grupo APACHE
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/48_APACHE
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gapache']
+
+    - name: Copia regla para el grupo CENTREON
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/101_CENTREON
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gcentreon']
+
+    - name: Copia regla para el grupo DB
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/501_ORACLE
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gdb']
+
+    - name: Copia regla para el grupo PSOFT
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/1274_PSOFT
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gpsoft']
+
+    - name: Copia regla para el grupo DOCKER
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/297_DOCKER
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gdocker']
+
+    - name: Copia regla para el grupo SF
+      copy:
+       src: /tecnol/ansible/olam/prod-etc/sudo/90_SF
+       dest: /tmp/
+       owner: root
+       group: root
+       mode: '0440'
+       backup: yes
+       force: yes
+      when: inventory_hostname in groups['gsf']
+...

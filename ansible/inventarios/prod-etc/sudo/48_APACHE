@@ -1,0 +1,2 @@
+apache ALL = (ALL) NOPASSWD: /usr/bin/crontab, /usr/bin/zip, /bin/chmod, /bin/chown, /usr/bin/whoami, /usr/bin/wc, /usr/bin/tail, /bin/rm
+Defaults:apache !requiretty

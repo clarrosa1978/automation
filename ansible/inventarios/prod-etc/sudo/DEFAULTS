@@ -1,0 +1,7 @@
+Defaults:nrpe !requiretty
+nrpe ALL = (ALL) NOPASSWD: ALL
+nagios  ALL = (ALL) NOPASSWD: ALL
+transfer ALL = (ALL) NOPASSWD: ALL
+Defaults:transfer !requiretty
+sysadm	ALL = (ALL) NOPASSWD: ALL
+Defaults:sysadm !requiretty

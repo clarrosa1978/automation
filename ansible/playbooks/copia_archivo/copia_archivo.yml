@@ -1,0 +1,14 @@
+---
+- hosts: all
+
+  tasks:
+    - name: Copia archivo {{ archivo }} al siguiente path:{{ destino }}
+      copy:
+       src: /tecnol/ansible/olam/temporal/{{ archivo }}
+       dest: "{{ destino }}"
+       owner: root
+       group: root
+       mode: '0644'
+       backup: yes
+       force: yes
+...

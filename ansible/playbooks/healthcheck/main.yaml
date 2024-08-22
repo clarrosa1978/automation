@@ -1,0 +1,55 @@
+- hosts: all
+  become: true
+  become_user: root
+  gather_facts: yes
+
+  vars:
+    file_to_send: "/tecnol/healthcheck/results/salida_final.txt"
+    email_sender: "root@slnxansible.com"
+    email_recipient: "fernando.letona@coto.com.ar"
+    email_subject: "[slnxansible] Healthcheck"
+    email_body: "Archivo con resultados adjuntado"
+  tasks:
+
+     - name: Copy script files
+       copy:
+         src:  /tecnol/ansible/olam/playbooks/healthcheck/python_scripts/main.py
+         dest: /tmp/hc_scripts/
+         force: yes
+       register: main_output
+       
+
+     - name: Execute main script
+       shell: python3.9 /tmp/hc_scripts/main.py
+       register: main_output
+       vars:
+         ansible_python_interpreter: /usr/bin/python3.9
+
+     - name: Copiar archivo temporal de salida al servidor Ansible
+       fetch:
+        src: /tmp/monitoring_output.txt
+        dest: /tecnol/healthcheck/results/{{ inventory_hostname }}/
+        flat: yes
+
+     - name: Concatenar todas las salidas en un solo archivo
+       local_action: shell cat /tecnol/healthcheck/results/*/monitoring_output.txt > '{{ file_to_send }}'
+
+     - name: Enviar correo con resultados
+       shell: |
+         echo -e "{{ email_body }}\nFecha y hora: $(date)" \
+         | mail -s '{{ email_subject }}' -a '{{ file_to_send }}' '{{ email_recipient }}'
+       delegate_to: slnxansible 
+       run_once: true
+
+     - name: Borrar archivos temporales serves
+       file:
+        path: "{{ item }}"
+        state: absent
+       with_items:
+         - /tmp/hc_scripts/
+         - /tmp/monitoring_output.txt
+  
+     - name: Borrar archivos temporales server ansible
+       shell: rm -rf /tecnol/healthcheck/results/*
+       delegate_to: slnxansible
+       run_once: true

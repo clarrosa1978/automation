@@ -1,0 +1,3 @@
+User_Alias SF = sortiz, jchariano, polcla, mescalante, dsama, sabonforte, cvillalba, laguirre, pgsuarez
+
+SF ALL= (sfctrl) NOPASSWD: /sfctrl, /sfctrl/bin/, /sfctrl/sfgv/bin/, /usr/bin/nohup , /usr/bin/printenv, /sfctrl/bin/scripts/

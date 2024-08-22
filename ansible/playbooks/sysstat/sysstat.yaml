@@ -1,0 +1,30 @@
+---
+- name: Instalar y configurar SAR 
+  hosts: all 
+  become: yes
+  tasks:
+
+    - name: Instalando paquetes 
+      yum:
+        name: sysstat
+        state: present
+        enablerepo: "*"
+      register: package_install_status
+
+    - name: Configurando historial a 1 semana 
+      lineinfile:
+        path: /etc/sysconfig/sysstat
+        regexp: '^(\s*)HISTORY=(\d+)'
+        line: 'HISTORY=7'
+        backup: yes
+
+    - name: Activa servicio al inicio
+      service:
+        name: sysstat
+        enabled: yes
+        state: started
+      register: sysstat_service_status
+
+    - name: Muestro estado del servicio 
+      debug:
+        var: sysstat_service_status

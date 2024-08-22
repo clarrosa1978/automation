@@ -1,0 +1,10 @@
+---
+- name: Git Pull Playbook
+  hosts: slnxansible01
+  tasks:
+    - name: Git Pull
+      become: yes
+      become_method: sudo
+      shell: git pull
+      args:
+        chdir: /tecnol/ansible/olam

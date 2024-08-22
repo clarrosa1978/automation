@@ -1,0 +1,30 @@
+---
+- name: Restaura la última copia de seguridad del archivo
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: "Busca todas las copias de seguridad para {{ archivo }}"
+      ansible.builtin.find:
+        recurse: no
+        paths:
+          - "{{ archivo | dirname }}"
+        patterns:
+          - '{{ archivo | basename }}\..*~'
+        use_regex: true
+      register: find_backup
+
+    - name: Selecciona la última copia de seguridad encontrada en el disco
+      ansible.builtin.set_fact:
+        latest_backup: "{{ (find_backup.files | sort(attribute='mtime') | last).path }}"
+
+    - name: Muestra la última copia de seguridad seleccionada
+      ansible.builtin.debug:
+        var: latest_backup
+
+    - name: "Restaura la última copia de seguridad de {{ archivo }}"
+      ansible.builtin.copy:
+        src: "{{ latest_backup }}"
+        remote_src: true
+        dest: "{{ archivo }}"
+...

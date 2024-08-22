@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# apache_exporter   Start the Apache Exporter.
+#
+# chkconfig: - 85 15
+# description: Apache Exporter service for Prometheus monitoring.
+
+# Source function library.
+. /etc/init.d/functions
+
+APACHE_EXPORTER_BIN="/usr/bin/apache_exporter"
+APACHE_EXPORTER_OPTS="--scrape_uri=http://localhost:7777/server-status/?auto"
+LOGFILE=/var/log/apache_exporter.log
+
+start() {
+    echo -n $"Starting apache_exporter: "
+    daemon $APACHE_EXPORTER_BIN $APACHE_EXPORTER_OPTS &>$LOGFILE &
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/apache_exporter
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping apache_exporter: "
+    killproc apache_exporter
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/apache_exporter
+    return $RETVAL
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    status)
+        status $APACHE_EXPORTER_BIN
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|status}"
+        exit 2
+esac
+
+exit $?
